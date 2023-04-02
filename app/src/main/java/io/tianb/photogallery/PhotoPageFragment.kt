@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import io.tianb.photogallery.databinding.FragmentPhotoPageBinding
@@ -25,10 +28,28 @@ class PhotoPageFragment : Fragment() {
         )
 
         binding.apply {
+            progressBar.max = 100
+
             webView.apply {
                 settings.javaScriptEnabled = true
                 webViewClient = WebViewClient()
                 loadUrl(args.photoPageUri.toString())
+
+                webChromeClient = object : WebChromeClient() {
+                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                        if (newProgress == 100) {
+                            progressBar.visibility = View.GONE
+                        } else {
+                            progressBar.visibility = View.VISIBLE
+                            progressBar.progress = newProgress
+                        }
+                    }
+
+                    override fun onReceivedTitle(view: WebView?, title: String?) {
+                        val parent = requireActivity() as AppCompatActivity
+                        parent.supportActionBar?.subtitle = title
+                    }
+                }
             }
         }
 
